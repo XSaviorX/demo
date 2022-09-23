@@ -1,0 +1,887 @@
+
+
+@{
+    ViewBag.Title = "Common";
+}
+<style type="text/css">
+    .my-custom-scrollbar {
+        position: relative;
+        height: 76vh;
+        overflow: auto;
+    }
+
+    .table-wrapper-scroll-y {
+        display: block;
+    }
+
+    .lbl_opcrTableH {
+        text-align: center;
+    }
+
+    sticky {
+        position: sticky;
+        top: 0;
+    }
+
+    /* enable absolute positioning */
+    .inner-addon {
+        position: relative;
+    }
+
+        /* style icon */
+        .inner-addon .bi {
+            position: absolute;
+            padding: 10px;
+            pointer-events: none;
+        }
+
+    /* align icon */
+    .left-addon .bi {
+        left: 0px;
+    }
+
+    .right-addon .bi {
+        right: 0px;
+    }
+
+    /* add padding  */
+    .left-addon input {
+        padding-left: 30px;
+    }
+
+    .right-addon input {
+        padding-right: 30px;
+    }
+
+    .inheritBg {
+        background-color: inherit
+    }
+
+    select {
+        /* for Firefox */
+        padding-left: 5px;
+        -moz-appearance: none;
+        /* for Chrome */
+        -webkit-appearance: none;
+    }
+
+        /* For IE10 */
+        select::-ms-expand {
+            display: none;
+        }
+</style>
+
+
+<div ng-controller="MFOStandard" id="divID" style=" margin: 10px">
+    <div class="row" style="background-color: white; margin: 10px 0px 10px; padding: 15px">
+        <div class="col-lg-1" style="width:50px">
+            <i ng-click="filterVisbility()" class="bi bi-filter btn btn-rounded" style="background-color: #f5f7fa; color: #84b3fa; font-size: 20px; padding: 5px 10px 5px 10px;"></i>
+        </div>
+        <div class="col-lg-2" ng-hide="filterShow">
+            <p style="margin-top: 10px">FILTER</p>
+        </div>
+        <div ng-show="filterShow">
+            <div class="col-lg-2">
+                <div class="box" style="border: solid; border-color: #EEEEEE; height: 36px; width: 232px; padding-left: 1px; border-radius: 5px;">
+                    <i class="bi bi-funnel" style="background-color: #EEEEEE; padding: 6px; "></i>
+                    <select ng-model="category" style="width: 150px; height: 30px; border:none">
+                        <option value=""> Filter by Category </option>
+                        <option value="1">Core Function</option>
+                        <option value="3">Support Function</option>
+                    </select>
+                    <i class="bi bi-chevron-double-down"></i>
+                    <span ng-click="dropdownClrCat()"><i class="bi bi-x" style="background-color: #EEEEEE; padding: 6px; "></i></span>
+                </div>
+            </div>
+            <div class="col-lg-2">
+                <div class="box" style="border: solid; border-color: #EEEEEE; height: 36px; width: 259px; padding-left: 1px; border-radius: 5px;">
+                    <span style="background-color: #EEEEEE; padding: 6px; ">Status:</span>
+                    <select ng-model="filterTarget" style="width: 150px; height: 30px; border:none">
+                        <option value="!!">with target count</option>
+                        <option value="!">without target count</option>
+                    </select>
+                    <i class="bi bi-chevron-double-down"></i>
+                    <span ng-click="dropdownClrStat()"><i class="bi bi-x" style="background-color: #EEEEEE; padding: 6px; "></i></span>
+                </div>
+            </div>
+        </div>
+      
+        </div>
+
+
+    <div class="card" style="width: 100%; background-color: white;">
+        <div class="table-responsive" style="display:block;">
+            <div class="my-custom-scrollbar">
+                <table class="table  table-striped">
+                    <thead class="grey lighten-2">
+                        <tr>
+                            <th colspan="2">
+                                <h4><i class="bi bi-card-list"></i> <b>LIST OF COMMON MFO</b></h4>
+                            </th>
+                            <th colspan="2">
+                                <div class="row" ng-show="reportShow">
+                                    <div class="col-lg-3">
+                                        <span class="btn-rounded" style="background-color: #78A2CC; color: #021b4d; padding: 10px "><b>{{countCMFO}}</b> Common MFO</span> 
+                                    </div>
+                                    <div class="col-lg-3">
+                                        <span class="btn-rounded" style="background-color: #96B9D0; color: #021b4d; padding: 10px "><b>{{countCore}}</b> Core Function </span>  
+                                    </div>
+                                    <div class="col-lg-3">
+                                        <span class="btn-rounded" style="background-color: #BFD4DB; color: #021b4d; padding: 10px "><b>{{countSupport}}</b> Support Function</span>   
+                                    </div>
+                                    <div class="col-lg-3">
+                                        <span class="btn-rounded" style="background-color: #FFDF9E; color: #a13b05; padding: 10px "><b>{{notargetcount}}</b>   No Target Count</span> 
+                                    </div>
+                                </div>
+                             
+                            </th>
+                            <th>
+                                <i ng-click="reportsVisbility()" class="bi bi-file-earmark-text btn btn-rounded" style="background-color: #f5f7fa; color: #84b3fa; font-size: 20px; padding: 5px 10px 5px 10px;"></i> REPORTS
+                            </th>
+                        </tr>
+                        <tr>
+                            <th>
+                                CATEGORY
+                            </th>
+                            <th class="">
+                                COMMON MFO
+                            </th>
+                            <th class="">
+                                SUCCESS INDICATOR
+                            </th>
+                            <th>
+                                STATUS
+                            </th>
+                            <th class="" ng-hide="isHR">
+                                ACTIONS
+                            </th>
+                            <th class="" ng-show="isHR">
+                                ACTIONS
+                            </th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="item in cmfoes | unique: 'MFOId' | filter: {categoryId: category} | filter: {target: filterTarget}">
+                            <td style="max-width: 150px; width: 150px" ng-cloak><i>{{item.description}}</i></td>
+                            <td><b>{{item.MFO}}</b></td>
+                            <td>
+                                <table class="table table-columned" style="background-color: inherit">
+                                    <tbody ng-repeat="ind in cmfoes | filter:{MFOId: item.MFOId}" class=" no-border">
+                                        <tr>
+                                            <td>- <b><i>{{ind.target}}</i></b> {{ind.indicator}}</td>
+
+                                        </tr>
+
+
+                                    </tbody>
+                                </table>
+                            </td>
+                            <td>
+                                <table class="table table-columned" style="background-color: inherit">
+                                    <tbody ng-repeat="status in cmfoes | filter:{MFOId: item.MFOId}" class=" no-border">
+                                        <tr>
+                                            <td style="background-color: none">
+                                                <h5><i ng-if="!status.target" class="bi bi-x-circle" style="color:orange"></i></h5>
+                                                <h5><i ng-if="status.target > 0" class="bi bi-check2-all" style="color:forestgreen"></i></h5>
+                                            </td>
+
+                                        </tr>
+
+
+                                    </tbody>
+                                </table>
+                            </td>
+                            <td ng-hide="isHR">
+                                <table class="table table-columned" style="background-color: inherit">
+                                    <tbody ng-repeat="target in cmfoes | filter:{MFOId: item.MFOId}" class=" no-border">
+                                        <tr>
+
+                                            <td>
+                                                <button ng-if="!target.target" class="btn" ng-click="showAddTarget(target)" data-toggle="modal" data-target="#addTarget" style="background-color: #f5f7fa; color: dodgerblue; text-shadow: 1px 1px 2px #73F8F9; "><i class="bi bi-plus-lg"></i> ADD TARGET</button>
+                                                <button ng-if="target.target > 0" class="btn" ng-click="showEditTarget(target)" data-toggle="modal" data-target="#editTarget"  style="background-color: #EEFEEC; color: forestgreen; text-shadow: 1px 1px 2px #A5FF59; "><i class="bi bi-pencil-square"></i> EDIT TARGET</button>
+
+                                            </td>
+                                        </tr>
+
+
+                                    </tbody>
+                                </table>
+                            </td>
+
+                            <td ng-show="isHR">
+
+                                <button class="btn btn-link">
+                                    <h5><i class="bi bi-pencil-square btn-rounded" style="background-color: #f5f7fa; color: #84b3fa; font-size: 20px; padding: 10px;" ng-click="getAllSIbyMFO(item)" data-toggle="modal" data-target="#editMFO_allSIForm"></i></h5>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <hr />
+
+    <button ng-show="isHR" type="button" class="btn btn-primary" data-toggle="modal" data-target="#addSIForm" style="float: right; margin-right: 30px;" ng-click="getDistinctCMFO">
+        <i class="bi bi-plus-lg">
+            Add Success Indicator
+        </i>
+    </button>
+    <button ng-show="isHR" type="button" class="btn btn-primary" data-toggle="modal" data-target="#addMFOForm" style="float: right; margin-right: 30px;">
+        <i class="bi bi-plus-lg">
+            Add Common MFO
+        </i>
+    </button>
+
+    @*</a>*@
+
+    @*MODAL FOR ADD COMMON MFO*@
+    <div class="modal fade" id="addMFOForm" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="ModalTitle">COMMON MFO ADDING FORM</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="delIndicatorField()">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+
+
+                        <div class="form-group">
+
+                            <input type="hidden" value="0" id="idnum">
+                            <label><b>Common MFO Description</b></label>
+                            <textarea type="text" ng-model="newCMFO.MFO" class="form-control" name="addMFO" required></textarea><br />
+                            <div class="row">
+                                <div class="col-lg-1">
+                                    <label><b>Category:</b></label>
+                                </div>
+
+
+                                <div class="col-lg-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" ng-model="catCMFO.categoryId" type="radio" name="category" id="category1" value="1">
+                                        <label class="form-check-label" for="flexRadioDefault1">
+                                            Core Function
+                                        </label>
+                                    </div>
+
+                                </div>
+                                <div class="col-lg-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" ng-model="catCMFO.categoryId" type="radio" name="category" id="category2" value="3">
+                                        <label class="form-check-label" for="flexRadioDefault2">
+                                            Support Function
+                                        </label>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <label style="margin-top:10px;"><b>Success Indicators</b></label>
+
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-2">
+                                    <label> Target Count </label>
+                                    <input style=" height: 6vh;" ng-model="newSI.target" ng-change="onChangeTarget(newSI.target)" class="form-control" id="addIndicator2" placeholder="#{{$index + 1}}" required />
+                                </div>
+                                <div class="col-lg-10">
+                                    <label> Description </label>
+                                    <textarea type="text" ng-model="newSI.indicator" class="form-control" id="addIndicator" placeholder="#{{$index + 1}}" required></textarea>
+
+                                </div>
+                            </div>
+                            @*                        <div id="indicators" ng-repeat="newInd in newIndicator">
+                            *@
+                            <div class='row'>
+                                <div class='col-lg-1'>
+
+
+                                </div><div class='col-lg-11'>
+
+                                </div>
+
+                            </div>
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th style="width:30px;">
+                                            Rating
+                                        </th>
+                                        <th>
+                                            Quantity
+                                        </th>
+                                        <th>
+                                            Quality
+                                        </th>
+                                        <td>
+                                            Timeliness
+                                        </td>
+                                    </tr>
+
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="performance in addStandard">
+                                        <th>
+
+                                            <input ng-init="performance.rating = (addStandard.length - $index)" type="text" name="rate" ng-value="{{addStandard.length - $index}}" class="no-border inheritBg " readonly="readonly" />
+                                        </th>
+                                        <td>
+                                            <input ng-if="performance.rating  == 5" ng-model="performance.quantity = (r5)" name="quantity" class="no-border inheritBg" readonly="readonly" />
+                                            <input ng-if="performance.rating  == 4" ng-model="performance.quantity = (r4)" name="quantity" class="no-border inheritBg" readonly="readonly" />
+                                            <input ng-if="performance.rating  == 3" ng-model="performance.quantity = (r3)" name="quantity" class="no-border inheritBg" readonly="readonly" />
+                                            <input ng-if="performance.rating  == 2" ng-model="performance.quantity = (r2)" name="quantity" class="no-border inheritBg" readonly="readonly" />
+                                            <input ng-if="performance.rating  == 1" ng-model="performance.quantity = (r1)" name="quantity" class="no-border inheritBg" readonly="readonly" />
+
+                                        </td>
+                                        <td>
+                                            <input ng-model="performance.quality" class="form-control inheritBg" name="quality" />
+                                        </td>
+                                        <td>
+                                            <input ng-model="performance.timeliness" class="form-control inheritBg" name="timeliness" />
+                                        </td>
+                                    </tr>
+
+                                </tbody>
+                            </table>
+                            @*                        </div>
+                            *@
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="delIndicatorField()">CLOSE</button>
+                                <button type="submit" class="btn btn-primary" ng-click="addCMFO(newCMFO, catCMFO, newSI )">SAVE</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+    @*MODAL FOR ADD SUCCESS INDICATOR*@
+    <div class="modal fade" id="addSIForm" role="dialog" aria-labelledby="" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5>LIST OF COMMON MFO</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <label>Select Common MFO:</label>
+                    <div class="inner-addon right-addon">
+                        <i class="bi bi-chevron-down"></i>
+                        <input type="text" class="form-control" ng-model="selectedMFO" ng-click="onChangeShow(1)" readonly="readonly" style="cursor: pointer;">
+                    </div>
+
+                    <div class="check-element animate-show-hide" ng-if="show == 1" style="border-style: groove; border-width: 1px; padding: 5px; ">
+
+                        <div class="inner-addon left-addon">
+                            <i class="bi bi-search"></i>
+                            <input type="text" class="form-control" ng-model="search" placeholder="Search Common MFO here . . ." style="border-style: solid; border-width: 1px; border-color:black" />
+                        </div>
+
+                        <br />
+                        <table class="table table-striped">
+
+                            <tbody style="display: block; height: 550px; width: 100%; overflow: auto; ">
+                                <tr ng-repeat="item in cmfoes | unique: 'MFOId' | filter: {MFO:search}">
+
+                                    <td style="padding: 8px;width:600px; cursor: pointer;" ng-click="inputChangeVal(item.MFOId,item.MFO, 0)">{{item.MFO}}</td>
+
+                                </tr>
+                            </tbody>
+                        </table>
+                        <br />
+                        <div class="modal-footer">
+                            <button ng-click="onChangeShow(0)" class="btn btn-outline-secondary">close</button>
+                        </div>
+
+                    </div>
+                    <br />
+
+
+
+                </div>
+                <div class="modal-footer">
+                    <button ng-if="show == 0" type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button ng-if="show == 0" class="btn btn-primary" ng-click="getMFOperId()">Submit</button>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+    @*MODAL FOR ADD MORE COMMON SUCCESS INDICATOR*@
+    <div class="modal fade" id="addMoreSIForm" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true" data-keyboard="false" data-backdrop="static">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="ModalTitle">SUCCESS INDICATOR ADDING FORM</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="delIndicatorField()">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <ul class="nav nav-tabs nav-justified mb-3" id="ex1" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link active"
+                               data-toggle="tab"
+                               href="#addnewSI"
+                               role="tab"
+                               aria-selected="true">ADD NEW SUCCESS INDICATOR</a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link"
+                               data-toggle="tab"
+                               href="#listSI"
+                               role="tab"
+                               aria-selected="false">LIST OF CREATED SUCCESS INDICATOR</a>
+                        </li>
+                    </ul>
+                    @*============================================================================================== ADD NEW SUCCESS INDICATOR TAB ======================================================================================================*@
+                    <div class="tab-content clearfix" id="SPMS-content">
+                        <div class="tab-pane active" id="addnewSI">
+                            <div class="form-group">
+                                <label><b>Common MFO Description</b></label>
+                                <input type="text" ng-repeat="i in objCMFO  | unique: 'MFOId'" ng-model="i.MFO" class="form-control" name="addMFO" readonly="readonly" /><br />
+                                <label><b>Category:</b></label>
+                                <input type="text" ng-repeat="i in objCMFO  | unique: 'MFOId'" ng-model="i.description" class="form-control" name="addMFO" readonly="readonly" /><br />
+
+
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <label style="margin-top:10px;"><b>Success Indicators</b></label>
+
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-2">
+                                        <label> Target Count </label>
+                                        <input style="height: 6vh;" type="text" ng-model="newSI.target" ng-change="onChangeTarget(newSI.target)" class="form-control" placeholder="#{{$index + 1}}" id="targetId" />
+                                    </div>
+                                    <div class="col-lg-10">
+                                        <label> Description </label>
+                                        <textarea type="text" ng-model="newSI.indicator" class="form-control" id="addIndicator" placeholder="#{{$index + 1}}"></textarea>
+                                    </div>
+
+                                </div>
+
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th style="width:30px;">
+                                                Rating
+                                            </th>
+                                            <th>
+                                                Quantity
+                                            </th>
+                                            <th>
+                                                Quality
+                                            </th>
+                                            <td>
+                                                Timeliness
+                                            </td>
+                                        </tr>
+
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="performance in addStandard">
+                                            <th>
+
+                                                <input ng-init="performance.rating = (addStandard.length - $index)" type="text" name="rate" ng-value="{{addStandard.length - $index}}" class="no-border inheritBg" readonly="readonly" />
+                                            </th>
+                                            <td>
+                                                <input ng-if="performance.rating  == 5" ng-model="performance.quantity = (r5)" name="quantity" class="no-border inheritBg" readonly="readonly" />
+                                                <input ng-if="performance.rating  == 4" ng-model="performance.quantity = (r4)" name="quantity" class="no-border inheritBg" readonly="readonly" />
+                                                <input ng-if="performance.rating  == 3" ng-model="performance.quantity = (r3)" name="quantity" class="no-border inheritBg" readonly="readonly" />
+                                                <input ng-if="performance.rating  == 2" ng-model="performance.quantity = (r2)" name="quantity" class="no-border inheritBg" readonly="readonly" />
+                                                <input ng-if="performance.rating  == 1" ng-model="performance.quantity = (r1)" name="quantity" class="no-border inheritBg" readonly="readonly" />
+
+                                            </td>
+                                            <td>
+                                                <input ng-model="performance.quality" class="form-control inheritBg" name="quality" />
+                                            </td>
+                                            <td>
+                                                <input ng-model="performance.timeliness" class="form-control inheritBg" name="timeliness" />
+                                            </td>
+                                        </tr>
+
+                                    </tbody>
+                                </table>
+                                @*                        </div>
+                                *@
+                                <div class="modal-footer">
+                                    <button style="position:absolute;left: 2px;" data-dismiss="modal" data-toggle="modal" data-target="#addSIForm" ng-show="showBckBtn" class="btn btn-info"><i class="bi bi-arrow-bar-left"></i>BACK</button>
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="delIndicatorField()">CLOSE</button>
+                                    <button type="button" class="btn btn-primary" ng-click="moreSI(newSI)">SAVE</button>
+                                </div>
+                            </div>
+                        </div>
+                        @*============================================================================================== LIST OF CREATED SUCCESS INDICATOR TAB ======================================================================================================*@
+                        <div class="tab-pane fade" id="listSI">
+                            <div class="table-responsive" style="display:block;">
+                                <div class="my-custom-scrollbar">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Target</th>
+                                                <th>Description</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="items in objCMFO | unique: 'indicatorId'">
+                                                <td>{{items.target}}</td>
+                                                <td>{{items.indicator}}</td>
+                                                <td>
+                                                    <button ng-click="showStandard(items, true)" data-toggle="modal" data-target="#addPerformance" class="btn btn-primary">
+                                                        <i class="bi bi-eye">
+                                                            Show Standard
+                                                        </i>
+                                                    </button>
+                                                </td>
+
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+
+    @* Modal for editting MFO and all SI*@
+    <div class="modal fade" id="editMFO_allSIForm" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true" onclose="">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="ModalTitle">MFO and SI UPDATE FORM</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="form-group">
+                        <br />
+                        <label><b>MFO Description</b></label>
+
+                        <textarea type="text" ng-model="update_mfo.MFO" class="form-control" id="updateAll_MFODesc"></textarea>
+                        <br />
+                        <div class="row">
+                            <div class="col-lg-1">
+                                <label><b>Category:</b></label>
+                            </div>
+
+
+                            <div class="col-lg-2">
+                                <div class="form-check">
+                                    <input type="radio" name="category" id="showcategory1" value="1" ng-model="updatecatMFO.categoryId">
+                                    <label class="form-check-label" for="flexRadioDefault1">
+                                        Core Function
+                                    </label>
+                                </div>
+
+                            </div>
+                            <div class="col-lg-2">
+                                <div class="form-check">
+                                    <input type="radio" name="category" id="showcategory2" value="3" ng-model="updatecatMFO.categoryId">
+                                    <label class="form-check-label" for="flexRadioDefault2">
+                                        Support Function
+                                    </label>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <label style="margin-top:10px;"><b>Success Indicators</b></label>
+
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-2">
+                                <label> Target Count </label>
+                            </div>
+                            <div class="col-lg-9">
+                                <label> Description </label>
+                            </div>
+                            <div class="col-lg-1">
+                                <label>Standard </label>
+                            </div>
+                        </div>
+                        <div id="update_AllSI" ng-repeat="upInd in updateMFO_allSI ">
+
+                            <div class='row'>
+                                <div class='col-lg-2'>
+                                    <input style="margin-top:20px;width: 100px; text-align: right; height: 6vh" type="text" ng-model="upInd.target" class="form-control" id="uptarget" placeholder="Count" />
+
+                                </div>
+                                <div class='col-lg-9'>
+                                    <textarea rows="2" style="margin-top:20px;" type="text" ng-model="upInd.indicator" class="form-control" id="upIndicator" placeholder="#1"></textarea>
+
+                                </div>
+                                <div class='col-lg-1'>
+                                    <button style="margin-top: 30px; " class="btn btn-rounded btn-warning" ng-click="showStandard(upInd, false)" data-toggle="modal" data-target="#addPerformance">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+
+                                </div>
+                            </div>
+
+                        </div>
+                        <br />
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="">CLOSE</button>
+                            <button type="button" class="btn btn-primary" ng-click="updateMFO_allSIbyID(update_mfo.MFO,updateMFO_allSI, updatecatMFO)">UPDATE</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* Modal SHOW STANDARD*@
+    <div class="modal fade" id="addPerformance" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">STANDARD</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <td>
+                                    Rating
+                                </td>
+                                <td>
+                                    Quantity
+                                </td>
+                                <td>
+                                    Quality
+                                </td>
+                                <td>
+                                    Timeliness
+                                </td>
+                            </tr>
+
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="standard in standard_show">
+                                <td>
+
+
+                                    <input ng-model="standard.rating" class="no-border" readonly="readonly" />
+                                </td>
+
+                                <td>
+                                    <input ng-model="standard.quantity" class="no-border" />
+                                </td>
+                                <td>
+                                    <input ng-model="standard.quality" class="form-control" name="quality" />
+                                </td>
+                                <td>
+                                    <input ng-model="standard.timeliness" class="form-control" name="timeliness" />
+                                </td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <h5>
+                        <button type="button" class="btn btn-info" ng-click="copyQT()" style="position:absolute; left: 10px" ng-show="copyBtn"><i class="bi bi-clipboard"></i> Copy Standard</button>
+
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+
+                        <button ng-click="updateStandard()" id="addPrfmc" type="button" class="btn btn-primary">UPDATE</button>
+                    </h5>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* Modal ADD TARGET*@
+    <div class="modal fade" id="addTarget" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">ADD TARGET COUNT</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-lg-2">
+                            <label> Target Count </label>
+                            <input style="height: 6vh;" type="text" ng-model="countTarget" ng-change="onChangeTarget(countTarget)" class="form-control" placeholder="#{{$index + 1}}" id="targetId" />
+                        </div>
+                        <div class="col-lg-10">
+                            <label> Description </label>
+                            <textarea type="text" ng-model="indicatorDesc" class="form-control" id="addIndicator" readonly="readonly"></textarea>
+                        </div>
+
+                    </div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <td>
+                                    Rating
+                                </td>
+                                <td>
+                                    Quantity
+                                </td>
+                                <td>
+                                    Quality
+                                </td>
+                                <td>
+                                    Timeliness
+                                </td>
+                            </tr>
+
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="performance in standardShow">
+                                <td>
+
+
+                                    <input ng-init="performance.rating = (standardShow.length - $index)" type="text" name="rate" ng-value="{{standardShow.length - $index}}" class="no-border" readonly="readonly" />
+                                </td>
+
+                                <td>
+                                    <input ng-if="performance.rating  == 5" ng-model="performance.quantity = (r5)" name="quantity" class="no-border" readonly="readonly" />
+                                    <input ng-if="performance.rating  == 4" ng-model="performance.quantity = (r4)" name="quantity" class="no-border" readonly="readonly" />
+                                    <input ng-if="performance.rating  == 3" ng-model="performance.quantity = (r3)" name="quantity" class="no-border" readonly="readonly" />
+                                    <input ng-if="performance.rating  == 2" ng-model="performance.quantity = (r2)" name="quantity" class="no-border" readonly="readonly" />
+                                    <input ng-if="performance.rating  == 1" ng-model="performance.quantity = (r1)" name="quantity" class="no-border" readonly="readonly" />
+                                </td>
+                                <td>
+                                    <input ng-model="performance.quality" name="quality" class="no-border" readonly="readonly" />
+                                </td>
+                                <td>
+                                    <input ng-model="performance.timeliness" name="timeliness" class="no-border" readonly="readonly" />
+                                </td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+
+                    <button ng-click="addTarget(countTarget)" id="addPrfmc" type="button" class="btn btn-primary">SAVE</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* Modal EDIT TARGET*@
+    <div class="modal fade" id="editTarget" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">EDIT TARGET COUNT</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-lg-2">
+                            <label> Target Count </label>
+                            <input style="height: 6vh;" type="text" ng-model="countTarget" ng-change="onChangeTarget(countTarget)" ng-init="onChangeTarget(countTarget)" class="form-control" placeholder="#{{$index + 1}}" id="targetId" />
+                        </div>
+                        <div class="col-lg-10">
+                            <label> Description </label>
+                            <textarea type="text" ng-model="indicatorDesc" class="form-control" id="addIndicator" readonly="readonly"></textarea>
+                        </div>
+
+                    </div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <td>
+                                    Rating
+                                </td>
+                                <td>
+                                    Quantity
+                                </td>
+                                <td>
+                                    Quality
+                                </td>
+                                <td>
+                                    Timeliness
+                                </td>
+                            </tr>
+
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="performance in standardShow">
+                                <td>
+
+
+                                    <input ng-init="performance.rating = (standardShow.length - $index)" type="text" name="rate" ng-value="{{standardShow.length - $index}}" class="no-border" readonly="readonly" />
+                                </td>
+
+                                <td>
+                                    <input ng-if="performance.rating  == 5" ng-model="performance.quantity = (r5)" name="quantity" class="no-border" readonly="readonly" />
+                                    <input ng-if="performance.rating  == 4" ng-model="performance.quantity = (r4)" name="quantity" class="no-border" readonly="readonly" />
+                                    <input ng-if="performance.rating  == 3" ng-model="performance.quantity = (r3)" name="quantity" class="no-border" readonly="readonly" />
+                                    <input ng-if="performance.rating  == 2" ng-model="performance.quantity = (r2)" name="quantity" class="no-border" readonly="readonly" />
+                                    <input ng-if="performance.rating  == 1" ng-model="performance.quantity = (r1)" name="quantity" class="no-border" readonly="readonly" />
+                                </td>
+                                <td>
+                                    <input ng-model="performance.quality" name="quality" class="no-border" readonly="readonly" />
+                                </td>
+                                <td>
+                                    <input ng-model="performance.timeliness" name="timeliness" class="no-border" readonly="readonly" />
+                                </td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+
+                    <button ng-click="editTarget(countTarget)" id="addPrfmc" type="button" class="btn btn-primary">SAVE</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section JavaScript{
+    <script src="~/Scripts/AngularJS/MFOStandard/CommonMFO.js"></script>
+
+
+
+}
